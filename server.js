@@ -1,8 +1,13 @@
 const http = require('http');
-const { getTodos, createTodo, updateTodo, deleteTodo } = require('./controllers/todosController')
+const { getTodos, createTodo, updateTodo, deleteTodo, toggleAll, deleteChecked } = require('./controllers/todosController')
 
 const server = http.createServer((req, res) => {
-    if (req.url === '/todos' && req.method === 'GET') {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE,PATCH');
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else if (req.url === '/todos' && req.method === 'GET') {
         getTodos(req, res)
     } else if (req.url === '/todos' && req.method === 'POST') {
         createTodo(req, res)
@@ -10,6 +15,10 @@ const server = http.createServer((req, res) => {
         updateTodo(req, res)
     } else if (req.url.match(/\/todos\/\w+/) && req.method === 'DELETE') {
         deleteTodo(req, res)
+    } else if (req.url === '/todos' && req.method === 'PUT') {
+        toggleAll(req, res)
+    } else if (req.url === '/todos' && req.method === 'DELETE') {
+       deleteChecked (req, res)
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({messsage: 'Not Found'}))

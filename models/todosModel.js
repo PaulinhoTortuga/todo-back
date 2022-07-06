@@ -42,10 +42,41 @@ const remove = id => {
     })
 }
 
+const toggleAll = () => {
+    return new Promise((resolve, reject) => {
+        let uncheckedTodos = todos.filter(item => item.checked === false)
+        console.log(uncheckedTodos.length)
+        if(uncheckedTodos.length !== 0) {
+            todos = todos.map(item => {
+                item.checked = true;
+                return item
+            })
+        } else {
+            todos = todos.map(item => {
+                item.checked = false;
+                return item
+            })
+        }
+        writeDataToFile('./data/todos.json', todos)
+        resolve(todos)
+    })
+}
+
+const deleteChecked = () => {
+    return new Promise((resolve, reject) => {
+        todos = todos.filter(item => item.checked === false)
+        writeDataToFile('./data/todos.json', todos)
+        resolve(todos)
+    })
+
+}
+
 module.exports = { 
     findAll,
     findByID,
     create,
     update,
-    remove
+    remove,
+    toggleAll,
+    deleteChecked
 }

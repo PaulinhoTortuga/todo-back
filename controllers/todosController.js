@@ -75,9 +75,33 @@ const deleteTodo = async (req, res) => {
     }
 }
 
+const toggleAll = async (req, res) => {
+    try {
+        const todos = await Todos.toggleAll()
+
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(todos))
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const deleteChecked = async (req, res) => {
+    try {
+        const todos = await Todos.deleteChecked()
+
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(todos))
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 module.exports = {
     getTodos,
     createTodo,
     updateTodo,
-    deleteTodo
+    deleteTodo, 
+    toggleAll,
+    deleteChecked
 }
