@@ -2,11 +2,12 @@ const http = require('http');
 const { getTodos, createTodo, updateTodo, deleteTodo, toggleAll, deleteChecked } = require('./controllers/todosController')
 
 const server = http.createServer((req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE,PATCH');
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE');
     if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
+        res.writeHead(200);
+        res.end()
     } else if (req.url === '/todos' && req.method === 'GET') {
         getTodos(req, res)
     } else if (req.url === '/todos' && req.method === 'POST') {

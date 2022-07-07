@@ -6,21 +6,14 @@ const writeDataToFile = (filename, content) => {
     })
 }
 
-const getPostData = req => {
-    return new Promise((resolve, reject) => {
-        try {
-            let body = ''
-            req.on('data', chunk => {
-                body += chunk.toString()
-            })
-            req.on('end', () => {
-                resolve(body)
-            })
-        } catch (err) {
-        reject(err)
-        }
-    })
-}
+const getPostData = async (req) => {
+    const buffers = [];
+    for await (const chunk of req) {
+      buffers.push(chunk);
+    }
+    const data = Buffer.concat(buffers).toString();
+    return JSON.parse(data);
+  };
 
 module.exports = {
     writeDataToFile,
