@@ -1,4 +1,5 @@
 let todos = require('../data/todos')
+
 const { v4: uuidv4 } = require('uuid')
 
 const { writeDataToFile } = require('../utils')
@@ -25,12 +26,15 @@ const create = todo => {
     })
 }
 
-const update = (id, todo) => {
+const update = (id, todoData) => {
     return new Promise((resolve, reject) => {
-        const index = todos.findIndex(item => item.id === id)
-        todos[index] = {id, ...todo}
-        writeDataToFile('./data/todos.json', todos)
-        resolve(todos[index])
+        const newTodos = todos.map(item => {
+           return id === item.id ? {...item, ...todoData} : item
+        })
+        const index = newTodos.findIndex(item => item.id === id)
+        // todos[index] = {id, ...todo}
+        writeDataToFile('./data/todos.json', newTodos)
+        resolve(newTodos[index])
     })
 }
 
@@ -45,7 +49,6 @@ const remove = id => {
 const toggleAll = () => {
     return new Promise((resolve, reject) => {
         let uncheckedTodos = todos.filter(item => item.checked === false)
-        console.log(uncheckedTodos.length)
         if(uncheckedTodos.length !== 0) {
             todos = todos.map(item => {
                 item.checked = true;

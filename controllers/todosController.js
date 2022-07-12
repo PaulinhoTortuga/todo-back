@@ -1,10 +1,11 @@
 const Todos = require('../models/todosModel')
+const client = require('../data/mongo')
 const { getPostData } = require('../utils')
 
-const getTodos = async(req, res) => {
+const getTodos = async (req, res) => {
+    client.connect()
     try {
-        const todos = await Todos.findAll()
-
+        const todos = await client.db("todoDB").collection("todos").find({})
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify(todos))
     } catch (error) {
@@ -14,18 +15,16 @@ const getTodos = async(req, res) => {
 
 const createTodo = async (req, res) => {
     try {
-        const body = await getPostData(req)
-        const { value, checked } = JSON.parse(body)
-
-        const todo = {
-            value,
-            checked
-        }
-
-        const newTodo = await Todos.create(todo)
-
-        res.writeHead(201, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify(newTodo))        
+        getPostData(req, async ({ value, checked }) => {
+            const todo = {
+              value,
+              checked,
+            };
+            const newTodo = await client.db("todoDB").collection("todos").insertOne(todo);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify(newTodo));
+            res.end();
+          });     
 
     } catch (error) {
         res.end({ 'message': error.message })
@@ -41,17 +40,12 @@ const updateTodo = async (req, res) => {
             res.writeHead(404, { 'Content-Type': 'aplication/json' })
             res.end(JSON.stringify({ message: 'Todo Not Found'}))
         } else {
-            const body = await getPostData(req)
-            console.log(body)
-            const { value, checked } = JSON.parse(body)
-    
-            const todoData = {
-                value: value || todo.value,
-                checked: checked || todo.checked
-            }
-            const updTodo = await Todos.update(id, todoData)
-            res.writeHead(200, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify(updTodo))        
+            getPostData(req, async todoData => {
+                const updTodo = client.db("todoDB").collection("todos").updateOne({id: id}, {$set: todoData});
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.write(JSON.stringify(updTodo));
+                res.end();
+              });
         }
     } catch (error) {
         console.log(error)
@@ -66,7 +60,7 @@ const deleteTodo = async (req, res) => {
             res.writeHead(404, { 'Content-Type': 'application/json' })
             res.end(JSON.stringify({ message: 'Todo Not Found' }))
         } else {
-            await Todos.remove(id)
+            client.db("todoDB").collection("todos").deleteOne({id: id})
             res.writeHead(200, { 'Content-Type': 'application/json' })
             res.end(JSON.stringify({ message: `Todo ${id} removed` }))
         }
@@ -88,7 +82,7 @@ const toggleAll = async (req, res) => {
 
 const deleteChecked = async (req, res) => {
     try {
-        const todos = await Todos.deleteChecked()
+        const todos = await client.db("todoDB").collection("todos").deleteMany({checked: true})
 
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify(todos))
